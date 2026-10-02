@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BillEase Loan Calculator</title>
+    
+    <!-- PWA Mobile Capabilities -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BillEase Calc">
+    
+    <!-- Web App Manifest Dynamic Generation -->
+    <link id="manifest-placeholder" rel="manifest">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --accent: #06b6d4;
+            --bg-glass: rgba(255, 255, 255, 0.45);
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --green: #4ade80;
+            --red: #f87171;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(rgba(15, 23, 42, 0.5), rgba(15, 23, 42, 0.75)), 
+                        url('https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=1600&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 20px 14px 40px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .calculator-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 480px;
+            padding: 24px 20px;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #1e40af, #1d4ed8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 26px;
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .header p {
+            margin: 4px 0 0 0;
+            font-size: 12px;
+            color: #1e293b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.85);
+            border: 1.5px solid rgba(15, 23, 42, 0.25);
+            color: #0f172a;
+            font-size: 15px;
+            border-radius: 12px;
+            padding: 12px 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 233, 0.2);
+            background-color: #ffffff;
+        }
+
+        .readonly-input {
+            background-color: rgba(15, 23, 42, 0.1);
+            color: #0f172a;
+            font-family: monospace;
+            font-weight: 800;
+            border-color: rgba(15, 23, 42, 0.15);
+        }
+
+        .sub-hint {
+            font-size: 11px;
+            color: #1e293b;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .btn-toggle-reg {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 800;
+            border: 2px solid var(--primary-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary-dark);
+            margin-bottom: 18px;
+            text-transform: uppercase;
+        }
+
+        .btn-toggle-reg.active {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #ffffff;
+            border-color: #15803d;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 6px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            cursor: pointer;
+        }
+
+        .term-selector {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .term-btn {
+            flex: 1;
+            padding: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            border-radius: 8px;
+            border: 1px solid var(--primary);
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--primary-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .term-btn.active {
+            background: var(--primary-dark);
+            color: #ffffff;
+            border-color: var(--primary-dark);
+            box-shadow: 0 2px 6px rgba(37, 99, 233, 0.4);
+        }
+
+        .suggestions-panel {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 12px 14px;
+            font-size: 14px;
+            color: #334155;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .suggestion-item:hover {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #ffffff;
+        }
+
+        .custom-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .custom-row select, .custom-row input {
+            padding: 8px;
+            border: 1px solid rgba(15, 23, 42, 0.25);
+            border-radius: 8px;
+            font-size: 13px;
+            background: #ffffff;
+        }
+
+        .btn-remove {
+            color: #dc2626;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 4px 8px;
+            border: none;
+            background: none;
+            font-size: 1.2rem;
+        }
+
+        .btn-add-custom {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1.5px solid var(--primary);
+            color: var(--primary-dark);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 6px;
+            text-transform: uppercase;
+        }
+
+        .results-container {
+            margin-top: 24px;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 58, 138, 0.95));
+            border-radius: 18px;
+            padding: 18px;
+            color: #ffffff;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .total-dp-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 17px;
+            font-weight: 700;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .total-dp-row span:last-child {
+            color: var(--accent);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 11px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .comparison-table th {
+            background-color: rgba(0, 0, 0, 0.4);
+            color: #cbd5e1;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .comparison-table tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .term-highlight {
+            font-weight: 600;
+            color: #93c5fd;
+        }
+
+        .amount-highlight {
+            font-weight: 700;
+            text-align: right;
+            font-family: monospace;
+        }
+
+        .accelerated-box {
+            margin-top: 14px;
+            background: rgba(22, 163, 74, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .accelerated-title {
+            color: var(--green);
+            font-weight: 800;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-top: 16px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+
+        .accordion-header:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .accordion-title {
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .accordion-icon {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease-out;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 8px;
+            max-height: 250px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .sched-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            text-align: right;
+        }
+
+        .sched-table th, .sched-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            white-space: nowrap;
+        }
+
+        .sched-table th {
+            background: rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            color: #cbd5e1;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .sched-table th:first-child, .sched-table td:first-child {
+            text-align: center;
+        }
+
+        .text-green {
+            color: var(--green);
+            font-weight: bold;
+        }
+
+        .quick-reply-section {
+            margin-top: 18px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.2);
+            padding-top: 14px;
+        }
+
+        .quick-reply-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .quick-reply-box {
+            width: 100%;
+            height: 150px;
+            background-color: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            box-sizing: border-box;
+            resize: none;
+            outline: none;
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #06b6d4, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-copy:active {
+            opacity: 0.8;
+        }
+
+        .floating-admin-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s ease;
+        }
+
+        .floating-admin-btn:hover {
+            transform: scale(1.08);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        .admin-modal {
+            background-color: #ffffff;
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .admin-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #64748b;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-update {
+            background: #0f172a;
+            color: white;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        .btn-add {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+
+        .admin-divider {
+            height: 1px;
+            background-color: rgba(15, 23, 42, 0.15);
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-card">
+        <div class="header">
+            <h1>BillEase Loan Portal</h1>
+            <p>Premium Calculator (v2.0 - Active)</p>
+        </div>
+
+        <div class="form-group">
+            <label>Select Category/Brand</label>
+            <select id="brandSelect" onchange="handleBrandChange()" class="form-control">
+                <option value="">-- Choose Brand --</option>
+                <option value="Hatasu">Hatasu (E-Bike)</option>
+                <option value="Honda">Honda</option>
+                <option value="Kawasaki">Kawasaki</option>
+                <option value="Kymco">Kymco</option>
+                <option value="Suzuki">Suzuki</option>
+                <option value="Yamaha">Yamaha</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Search & Select Model</label>
+            <input type="text" id="modelSearchInput" oninput="filterModels()" onfocus="showSuggestions()" placeholder="Type to search model..." class="form-control" />
+            <div id="suggestionsPanel" class="suggestions-panel"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Base SRP Amount (₱)</label>
+            <input type="text" id="srpAmount" value="0" readonly class="form-control readonly-input" />
+        </div>
+
+        <!-- Registration & Insurance Toggle Option -->
+        <button type="button" id="regBtn" class="btn-toggle-reg" onclick="toggleRegistration()">
+            ➕ Add Registration & Insurance (+₱2,800)
+        </button>
+
+        <div class="form-group">
+            <label>Downpayment Amount (₱)</label>
+            <input type="number" id="downpaymentAmount" oninput="calculateLoan()" placeholder="Enter downpayment" class="form-control" />
+            <div class="sub-hint">Optional downpayment</div>
+        </div>
+
+        <div class="form-group">
+            <label>Repayment Frequency</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" name="freq" value="1" checked onchange="calculateLoan()"> Monthly
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="freq" value="2" onchange="calculateLoan()"> Twice a month
+                </label>
+            </div>
+        </div>
+
+        <!-- Target Payment & Term Selection Buttons -->
+        <div class="form-group">
+            <label>Target Payment Term</label>
+            <div class="term-selector">
+                <button type="button" class="term-btn active" onclick="selectTargetTerm(12, this)">12 Mos</button>
+                <button type="button" class="term-btn" onclick="selectTargetTerm(18, this)">18 Mos</button>
+                <button type="button" class="term-btn" onclick="selectTargetTerm(24, this)">24 Mos</button>
+                <button type="button" class="term-btn" onclick="selectTargetTerm(36, this)">36 Mos</button>
+            </div>
+            <label style="margin-top: 10px;">Comfortable Payment (₱)</label>
+            <input type="number" id="comfortablePmt" oninput="calculateLoan()" placeholder="Optional target payment" class="form-control" />
+            <div class="sub-hint" id="minMonthlyHint">Minimum required monthly (12m): ₱0</div>
+        </div>
+
+        <!-- Custom Payments Option -->
+        <div class="form-group">
+            <label>Custom Payments (Optional)</label>
+            <div class="sub-hint" style="margin-bottom: 6px;">Specify custom payment amounts for specific periods:</div>
+            <div id="customRowsContainer"></div>
+            <button type="button" class="btn-add-custom" onclick="addCustomRow()">+ Add Custom Payment</button>
+        </div>
+
+        <div class="results-container">
+            <div class="summary-row">
+                <span>Effective Price:</span>
+                <span id="effectivePriceDisplay">₱0</span>
+            </div>
+            <div class="summary-row">
+                <span>Financed Amount:</span>
+                <span id="financedAmountDisplay">₱0</span>
+            </div>
+
+            <div class="summary-row" style="font-weight: 700; color: #93c5fd;">
+                <span>Total Loan Amount:</span>
+                <span id="loanAmountDisplay">₱0</span>
+            </div>
+            <div class="total-dp-row">
+                <span>Total Downpayment:</span>
+                <span id="totalDownpaymentDisplay">₱0</span>
+            </div>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Term</th>
+                        <th style="text-align: right;" id="amortHeaderLabel">Monthly Amortization</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="term-highlight">12 Months</td>
+                        <td id="amort12" class="amount-highlight">₱0</td>
+                    </tr>
+                    <tr>
+                        <td class="term-highlight">18 Months</td>
+                        <td id="amort18" class="amount-highlight">₱0</td>
+                    </tr>
+                    <tr>
+                        <td class="term-highlight">24 Months</td>
+                        <td id="amort24" class="amount-highlight">₱0</td>
+                    </tr>
+                    <tr>
+                        <td class="term-highlight" style="color: var(--green);">36 Months</td>
+                        <td id="amort36" class="amount-highlight" style="color: var(--green);">₱0</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Accelerated Payoff Block -->
+            <div id="acceleratedBlock" class="accelerated-box" style="display: none;">
+                <div class="accelerated-title">⚡ Accelerated Payoff Summary</div>
+                <div class="summary-row" style="margin-bottom: 4px;">
+                    <span>Payoff Time:</span>
+                    <span id="resPayoffTime" class="text-green">-</span>
+                </div>
+                <div class="summary-row" style="margin-bottom: 4px;">
+                    <span>Total Interest Paid:</span>
+                    <span id="resAccInterest" class="text-green">₱0</span>
+                </div>
+                <div class="summary-row" style="margin-bottom: 0;">
+                    <span>Interest Savings:</span>
+                    <span id="resSavings" class="text-green">₱0</span>
+                </div>
+            </div>
+
+            <!-- Slide-down Accordion Amortization Schedule -->
+            <div class="accordion-header" onclick="toggleAccordion()">
+                <div class="accordion-title" id="schedHeaderLabel">
+                    📊 Amortization Schedule (12 Mos Base)
+                </div>
+                <div class="accordion-icon" id="accordionIcon">▼</div>
+            </div>
+            
+            <div class="accordion-content" id="accordionContent">
+                <div class="table-container">
+                    <table class="sched-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Balance</th>
+                                <th>Principal</th>
+                                <th>Interest</th>
+                                <th>Due</th>
+                                <th>Excess</th>
+                                <th>Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- QUICK RESPONSE SECTION -->
+            <div class="quick-reply-section">
+                <div class="quick-reply-title">Client Quick Reply Summary</div>
+                <textarea id="replyBox" class="quick-reply-box" readonly></textarea>
+                <button class="btn-copy" onclick="copyReply()">📋 Copy Summary for Inquiry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Admin Trigger Button -->
+    <button class="floating-admin-btn" onclick="openAdminModal()" title="Open Price Manager">⚙️</button>
+
+    <!-- Pop-up Admin Modal -->
+    <div id="adminModal" class="modal-overlay">
+        <div class="admin-modal">
+            <div class="modal-header">
+                <div class="admin-title">⚙️ Unit & Price Manager</div>
+                <button type="button" class="close-modal-btn" onclick="closeAdminModal()">&times;</button>
+            </div>
+            
+            <!-- Section 1: Add New Unit -->
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Add New Unit</label>
+                <select id="newUnitBrandSelect" class="form-control" style="font-size: 13px; margin-bottom: 8px;">
+                    <option value="">-- Choose Brand --</option>
+                    <option value="Hatasu">Hatasu (E-Bike)</option>
+                    <option value="Honda">Honda</option>
+                    <option value="Kawasaki">Kawasaki</option>
+                    <option value="Kymco">Kymco</option>
+                    <option value="Suzuki">Suzuki</option>
+                    <option value="Yamaha">Yamaha</option>
+                </select>
+                <input type="text" id="newUnitModelName" placeholder="Enter Model Name" class="form-control" style="font-size: 13px; margin-bottom: 8px;">
+                <input type="number" id="newUnitSrp" placeholder="Enter Base SRP Price (₱)" class="form-control" style="font-size: 13px; margin-bottom: 8px;">
+                <button type="button" onclick="addNewUnit()" class="form-control btn-update btn-add" style="padding: 10px;">Add New Unit</button>
+            </div>
+
+            <div class="admin-divider"></div>
+
+            <!-- Section 2: Update Existing Price -->
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Update Existing Price</label>
+                <select id="adminBrandSelect" onchange="populateAdminModels()" class="form-control" style="font-size: 13px; margin-bottom: 8px;">
+                    <option value="">-- Select Brand to Edit --</option>
+                    <option value="Hatasu">Hatasu (E-Bike)</option>
+                    <option value="Honda">Honda</option>
+                    <option value="Kawasaki">Kawasaki</option>
+                    <option value="Kymco">Kymco</option>
+                    <option value="Suzuki">Suzuki</option>
+                    <option value="Yamaha">Yamaha</option>
+                </select>
+                <select id="adminModelSelect" onchange="loadAdminSrp()" class="form-control" style="font-size: 13px; margin-bottom: 8px;">
+                    <option value="">-- Select Model --</option>
+                </select>
+                <input type="number" id="adminNewSrp" placeholder="Enter New Base SRP Price" class="form-control" style="font-size: 13px; margin-bottom: 8px;">
+                <button type="button" onclick="updateSrpPrice()" class="form-control btn-update" style="padding: 10px;">Update Price</button>
+            </div>
+
+            <div class="admin-divider"></div>
+
+            <!-- Section 3: Remove Phased Out Unit -->
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="color: #dc2626;">Remove / Delete Phased Out Unit</label>
+                <select id="deleteBrandSelect" onchange="populateDeleteModels()" class="form-control" style="font-size: 13px; margin-bottom: 8px;">
+                    <option value="">-- Select Brand --</option>
+                    <option value="Hatasu">Hatasu (E-Bike)</option>
+                    <option value="Honda">Honda</option>
+                    <option value="Kawasaki">Kawasaki</option>
+                    <option value="Kymco">Kymco</option>
+                    <option value="Suzuki">Suzuki</option>
+                    <option value="Yamaha">Yamaha</option>
+                </select>
+                <select id="deleteModelSelect" class="form-control" style="font-size: 13px; margin-bottom: 8px;">
+                    <option value="">-- Select Model to Remove --</option>
+                </select>
+                <button type="button" onclick="removeUnit()" class="form-control btn-update btn-delete" style="padding: 10px;">🗑️ Remove Unit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const priceBulletinData = {
+            "Hatasu": [
+                { name: "Hatasu Kumi (KUMI)", srp: 19990 },
+                { name: "Hatasu Nerolite (NEROLITE)", srp: 24990 },
+                { name: "Hatasu AYA (AYA)", srp: 39800 },
+                { name: "Hatasu VIVI", srp: 34800 },
+                { name: "Hatasu Haru Red (HARU-R)", srp: 39800 },
+                { name: "Hatasu Hero Black (HERO-BLK)", srp: 59990 },
+                { name: "Hatasu HERO2", srp: 75800 },
+                { name: "Hatasu Trike Black (TRIKE-BLK)", srp: 38500 },
+                { name: "Hatasu Trike w/o Roof Black (TRIKE-WOR-BLK)", srp: 34500 },
+                { name: "Hatasu Buggy", srp: 98800 },
+                { name: "Hatasu GTX001", srp: 69800 }
+            ],
+            "Honda": [
+                { name: "Honda Electric vehicle EM1", srp: 94400 },
+                { name: "Honda Electric vehicle CUV", srp: 194400 },
+                { name: "Honda DIO YM24", srp: 56800 },
+                { name: "Honda GIORNO+ YM25", srp: 96300 },
+                { name: "Honda GIORNO+ YM26", srp: 97400 },
+                { name: "Honda BeAT Playful YM25", srp: 66900 },
+                { name: "Honda BeAT Premium YM25", srp: 68900 },
+                { name: "Honda click125 standard YM25", srp: 76300 },
+                { name: "Honda click125 special edition YM25", srp: 79300 },
+                { name: "Honda Click125 YM26 Standard", srp: 76900 },
+                { name: "Honda Click125 YM26 Smart Edition", srp: 81400 },
+                { name: "Honda AirBlade160 YM23", srp: 120300 },
+                { name: "Honda ADV160 YM23", srp: 161300 },
+                { name: "Honda ADV160 YM26", srp: 161900 },
+                { name: "Honda ADV160 Roadsync YM26", srp: 169400 },
+                { name: "Honda ADV350 YM25", srp: 301400 },
+                { name: "Honda Click160 YM24", srp: 103300 },
+                { name: "Honda Click160 YM26", srp: 103400 },
+                { name: "Honda PCX160 ABS YM23", srp: 137300 },
+                { name: "Honda PCX160 Roadsync YM25", srp: 149400 },
+                { name: "Honda PCX160 Standard YM 25", srp: 127800 },
+                { name: "Honda PCX160 Standard YM26", srp: 127900 },
+                { name: "Honda Wave RSX (Drum) YM24", srp: 57300 },
+                { name: "Honda Wave RSX (Drum) YM26", srp: 57400 },
+                { name: "Honda Wave RSK (Disk) YM24", srp: 59300 },
+                { name: "Honda Wave Disk YM26", srp: 59400 },
+                { name: "Honda XRM125 DS YM24", srp: 66400 },
+                { name: "Honda XRM125 DSX YM24", srp: 69900 },
+                { name: "Honda XRM125 Motard YM24", srp: 71400 },
+                { name: "Honda RS125 YM24", srp: 70400 },
+                { name: "Honda Winner X Standard YM24", srp: 111400 },
+                { name: "Honda Winner X ABS Premium YM24", srp: 114400 },
+                { name: "Honda Winner X ABS Racing YM24", srp: 116400 },
+                { name: "Honda NAVI YM25", srp: 53400 },
+                { name: "Honda XR150L YM25", srp: 92400 },
+                { name: "Honda CRF125F (BIG WHEEL)", srp: 183400 },
+                { name: "Honda CRF150L YM22", srp: 142300 },
+                { name: "Honda CRF150L YM26", srp: 142400 },
+                { name: "Honda CRF150RBN", srp: 300400 },
+                { name: "Honda CB150X YM22", srp: 168300 },
+                { name: "Honda CBR150R YM25", srp: 178400 },
+                { name: "Honda CRF250R YM24", srp: 461400 },
+                { name: "Honda CRF250RX", srp: 463400 },
+                { name: "Honda CRF250RXR YM24", srp: 471400 },
+                { name: "Honda CRF250RXR YM25", srp: 463400 },
+                { name: "Honda CRF300L YM23", srp: 264300 },
+                { name: "Honda CRF300L YM25", srp: 264400 },
+                { name: "Honda CRF300 RALLY YM25", srp: 304400 },
+                { name: "Honda CRF450R", srp: 519400 },
+                { name: "Honda TMX125 Alpha YM24", srp: 51400 },
+                { name: "Honda TMX Supremo YM24", srp: 73400 }
+            ],
+            "Kawasaki": [
+                { name: "Kawasaki BARAKO II KICK BC175M YM25", srp: 95500 },
+                { name: "Kawasaki BARAKO II ELECTRIC BC175N YM25", srp: 99500 },
+                { name: "Kawasaki BARAKO III FI (KICK) YM23", srp: 96500 },
+                { name: "Kawasaki BARAKO III FI (DUAL) YM23", srp: 100500 },
+                { name: "Kawasaki Barako III Elec YM25", srp: 105000 },
+                { name: "Kawasaki CT100 YM24 ELEC", srp: 54100 },
+                { name: "Kawasaki CT125 YM21", srp: 55300 },
+                { name: "Kawasaki CT150 YM20", srp: 66900 },
+                { name: "Kawasaki Brusky 125 YM25", srp: 69400 },
+                { name: "Kawasaki Brusky 125 YM26", srp: 71400 },
+                { name: "Kawasaki ROUSER NS125 FI", srp: 76400 },
+                { name: "Kawasaki Rouser NS160 TD YM22", srp: 94300 },
+                { name: "Kawasaki PULSAR N250", srp: 155900 },
+                { name: "Kawasaki DOMINAR 400 UG2", srp: 203300 },
+                { name: "Kawasaki NINJA ZX-4RR 40th YM24", srp: 508400 },
+                { name: "Kawasaki NINJA ZX-4RR YM25", srp: 493400 },
+                { name: "Kawasaki NINJA ZX-4RR YM26", srp: 499400 },
+                { name: "Kawasaki NINJA ZX-6R 40th YM24", srp: 723400 },
+                { name: "Kawasaki NINJA ZX-6R YM26", srp: 715200 },
+                { name: "Kawasaki NINJA ZX-10R ABS 40th YM24", srp: 1024400 },
+                { name: "Kawasaki NINJA ZX-14R YM23", srp: 1094400 },
+                { name: "Kawasaki NINJA ZX-10R YM23", srp: 979400 },
+                { name: "Kawasaki NINJA ZX-10RR YM23", srp: 1544400 },
+                { name: "Kawasaki NINJA ZX-10R YM25", srp: 1014200 },
+                { name: "Kawasaki Z H2 YM24", srp: 944400 },
+                { name: "Kawasaki Z H2 YM23", srp: 914400 },
+                { name: "Kawasaki NINJA H2 CARBON YM21", srp: 1794400 },
+                { name: "Kawasaki Ninja ZX-6R YM23", srp: 689400 },
+                { name: "Kawasaki Ninja ZX-6R YM25", srp: 715200 },
+                { name: "Kawasaki NINJA ZX-25R SE YM23", srp: 423300 },
+                { name: "Kawasaki NINJA ZX-25R STD YM23", srp: 388300 },
+                { name: "Kawasaki Ninja ZX-25R ZX250H", srp: 400400 },
+                { name: "Kawasaki NINJA ZX-25R SE ZX250K", srp: 436000 },
+                { name: "Kawasaki GTR 1400 TOURER YM20", srp: 934400 },
+                { name: "Kawasaki Z1000 R EDITION YM23", srp: 704400 },
+                { name: "Kawasaki Z1000R EDITION YM25", srp: 716400 },
+                { name: "Kawasaki NINJA 1000 SX YM23", srp: 712400 },
+                { name: "Kawasaki Z900 SE YM23", srp: 612400 },
+                { name: "Kawasaki Z900F YM24", srp: 560900 },
+                { name: "Kawasaki Z900RS CAFE YM19", srp: 636400 },
+                { name: "Kawasaki Z900RS YM22", srp: 658400 },
+                { name: "Kawasaki Z900 SE YM24", srp: 612400 },
+                { name: "Kawasaki Ninja 110SX SE YM25", srp: 793400 },
+                { name: "Kawasaki Ninja 1100sx SE YM26", srp: 801300 },
+                { name: "Kawasaki Z900 SE YM25", srp: 631400 },
+                { name: "Kawasaki Z900 SE YM26", srp: 637400 },
+                { name: "Kawasaki Versys 1100 SE YM25", srp: 959400 },
+                { name: "Kawasaki W800 YM20", srp: 529400 },
+                { name: "Kawasaki W800 STREET YM22", srp: 509400 },
+                { name: "Kawasaki W800 CAFE YM20", srp: 551400 },
+                { name: "Kawasaki Z650RS 50TH YM22", srp: 475700 },
+                { name: "Kawasaki Z650RS YM22", srp: 463900 },
+                { name: "Kawasaki NINJA 650 YM23", srp: 446400 },
+                { name: "Kawasaki NINJA 500 YM24", srp: 348200 },
+                { name: "Kawasaki Ninja 500 SE YM24", srp: 374000 },
+                { name: "Kawasaki Ninja 500 SE YM25", srp: 374000 },
+                { name: "Kawasaki Z E-1 NR011A YM24", srp: 591400 },
+                { name: "Kawasaki NINJA E NX011A YM24", srp: 618400 },
+                { name: "Kawasaki Z500 YM24", srp: 324200 },
+                { name: "Kawasaki Z500 SE YM24", srp: 350000 },
+                { name: "Kawasaki Z500 YM26", srp: 284200 },
+                { name: "Kawasaki NINJA 650 YM24", srp: 446400 },
+                { name: "Kawasaki Z650 YM23", srp: 427400 },
+                { name: "Kawasaki Z650 Sport YM24", srp: 427400 },
+                { name: "Kawasaki Z400 YM23", srp: 273400 },
+                { name: "Kawasaki NINJA 400 YM23", srp: 335300 },
+                { name: "Kawasaki W175 YM21", srp: 124400 },
+                { name: "Kawasaki W175 YM23", srp: 128300 },
+                { name: "Kawasaki VERSYS 300 SE", srp: 264400 },
+                { name: "Kawasaki VERSYS 650 YM23", srp: 493400 },
+                { name: "Kawasaki Versys 650 YM25", srp: 503400 },
+                { name: "Kawasaki Versys 650 YM26", srp: 508400 },
+                { name: "Kawasaki VERSYS 1000 SE YM23", srp: 923400 },
+                { name: "Kawasaki Versys 1000 SE YM24", srp: 953400 },
+                { name: "Kawasaki VULCAN 1700 VAQUERO YM23", srp: 994400 },
+                { name: "Kawasaki VULCAN 900 CUSTOM YM22", srp: 619400 },
+                { name: "Kawasaki VULCAN S YM23", srp: 409400 },
+                { name: "Kawasaki VULCAN S YM25", srp: 424400 },
+                { name: "Kawasaki VULCAN S YM26", srp: 424400 },
+                { name: "Kawasaki ELIMINATOR YM24", srp: 354400 },
+                { name: "Kawasaki ELIMINATOR SE YM25", srp: 380800 },
+                { name: "Kawasaki ELIMINATOR YM26", srp: 360400 },
+                { name: "Kawasaki KLR650 YM25", srp: 444300 },
+                { name: "Kawasaki KLR650 S YM25", srp: 403400 },
+                { name: "Kawasaki KLX 230 DUAL YM22", srp: 190400 },
+                { name: "Kawasaki KLX230 SHERPA YM25", srp: 255700 },
+                { name: "Kawasaki KLX230 SE YM25", srp: 227400 },
+                { name: "Kawasaki KLX 150K LOW TYPE", srp: 129300 },
+                { name: "Kawasaki KLX 150S MY24", srp: 117400 },
+                { name: "Kawasaki KLX150 LX150K MY25", srp: 129300 },
+                { name: "Kawasaki KLX150S LX150L MY25", srp: 117400 }
+            ],
+            "Kymco": [
+                { name: "Kymco LIKE 125 ITALIA E3", srp: 84300 },
+                { name: "Kymco Like 125 Italia MMC", srp: 87900 },
+                { name: "Kymco SUPER Z 125 EURO 3", srp: 64300 },
+                { name: "Kymco SUPER 8 150 E3 REGULAR", srp: 70400 },
+                { name: "Kymco SUPER 2 150i 8 SERIES", srp: 78300 },
+                { name: "Kymco Dink R 150", srp: 143300 },
+                { name: "Kymco LIKE 150i", srp: 123900 },
+                { name: "Kymco Like II 150", srp: 128400 },
+                { name: "Kymco Sky Town 150 YM25", srp: 112900 },
+                { name: "Kymco KRV 180i TCS", srp: 174300 },
+                { name: "Kymco KRV MOTO 180", srp: 190300 },
+                { name: "Kymco XTOWN 300i FI ABS", srp: 203400 },
+                { name: "Kymco XTOWN CT 300i NOODE", srp: 208400 },
+                { name: "Kymco DT X360 300", srp: 223400 },
+                { name: "Kymco DT X360 350", srp: 262400 },
+                { name: "Kymco DOWNTOWN 350i TCS", srp: 228400 },
+                { name: "Kymco XCITING S 400i", srp: 363400 },
+                { name: "Kymco XCITING VS 400i", srp: 378400 },
+                { name: "Kymco AK550", srp: 513400 },
+                { name: "Kymco AK 550 PREMIUM", srp: 623400 },
+                { name: "Kymco Dollar 150 YM25", srp: 122200 },
+                { name: "Kymco Dink s 150 YM25", srp: 137300 },
+                { name: "Kymco AK Premium 575 YM25", srp: 643400 },
+                { name: "Kymco VISAR 110 AL E3", srp: 40300 },
+                { name: "Kymco VISAR 110 SP E3", srp: 38300 },
+                { name: "Kymco KARGADOR 150 EURO 3", srp: 57400 },
+                { name: "Kymco MXU 150", srp: 188400 },
+                { name: "Kymco UXV 450i", srp: 574400 }
+            ],
+            "Suzuki": [
+                { name: "Suzuki SKYDRIVE SPORT", srp: 66300 },
+                { name: "Suzuki SKYDRIVE CROSSOVER", srp: 68300 },
+                { name: "Suzuki Skydrive Sports YM24", srp: 68300 },
+                { name: "Suzuki AVENIS", srp: 74800 },
+                { name: "Suzuki AVENIS YM26", srp: 75800 },
+                { name: "Suzuki BURGMAN STREET 125 EX", srp: 87800 },
+                { name: "Suzuki BURGMAN STREET 125 EX YM25", srp: 87800 },
+                { name: "Suzuki BURGMAN STREET 125 YM24", srp: 78800 },
+                { name: "Suzuki Access 125 YM26", srp: 80300 },
+                { name: "Suzuki Access 125 Ride Connect YM26", srp: 89300 },
+                { name: "Suzuki Smash Carburetor (Drum/Spoke)", srp: 57800 },
+                { name: "Suzuki Smash Spoke YM25", srp: 58800 },
+                { name: "Suzuki Smash Carburetor (Disc/Mags) YM24", srp: 62800 },
+                { name: "Suzuki SMASH FI (SPOKES/DRUM)", srp: 61800 },
+                { name: "Suzuki SMASH FI (MAGS/DISC)", srp: 66800 },
+                { name: "Suzuki Smash Fi Spoke YM25", srp: 62800 },
+                { name: "Suzuki Smash Fi Drum/Spoke YM25", srp: 62800 },
+                { name: "Suzuki Smash Fi Disc/Mags YM25", srp: 67800 },
+                { name: "Suzuki Smash MAGS YM25", srp: 63800 },
+                { name: "Suzuki RAIDER J CROSSOVER", srp: 66300 },
+                { name: "Suzuki RAIDER R150 (CARBURETOR)", srp: 103300 },
+                { name: "Suzuki RAIDER R150 (CARB) MOTOGP", srp: 99800 },
+                { name: "Suzuki RAIDER R150 FI Rugged", srp: 116300 },
+                { name: "Suzuki Raider R150 Fi Matte Gray", srp: 116300 },
+                { name: "Suzuki RAIDER R150 FI Sport", srp: 116300 },
+                { name: "Suzuki Raider Blade Edition YM26", srp: 124400 },
+                { name: "Suzuki Raider Pro YM26", srp: 140800 },
+                { name: "Suzuki GIXXER SF YM25", srp: 109300 },
+                { name: "Suzuki GIXXER 155 Sports Solo", srp: 100800 },
+                { name: "Suzuki GIXXER SF 155 YM26", srp: 111300 },
+                { name: "Suzuki GIXXER FI YM25 SPORTS", srp: 99300 },
+                { name: "Suzuki GIXXER 250 SPORTS SOLO", srp: 177300 },
+                { name: "Suzuki GIXXER SF 250 SOLO", srp: 184300 },
+                { name: "Suzuki Gixxer SF250 Sport", srp: 187300 },
+                { name: "Gixxer 250 Naked", srp: 177300 },
+                { name: "Suzuki V-STROM 160", srp: 140400 },
+                { name: "Suzuki DR160 YM26 Black", srp: 123400 },
+                { name: "Suzuki DR160 YM26 White", srp: 123400 }
+            ],
+            "Yamaha": [
+                { name: "Yamaha MIO AEROX", srp: 117400 },
+                { name: "Yamaha Mio AEROX SP YM25", srp: 158800 },
+                { name: "Yamaha Mio AEROX YM25", srp: 128300 },
+                { name: "Yamaha Mio Fazzio BRV4 YM25", srp: 88300 },
+                { name: "Yamaha Mio Fazzio BRV6 YM26", srp: 88300 },
+                { name: "Yamaha MIO GEAR S", srp: 78800 },
+                { name: "Yamaha MIO GRAVIS YM25 W/ Conn", srp: 79300 },
+                { name: "Yamaha MIO I 125", srp: 72300 },
+                { name: "Yamaha MIO I 125 YM26", srp: 70300 },
+                { name: "Yamaha MIO I 125S", srp: 77300 },
+                { name: "Yamaha MIO SPORTY", srp: 65800 },
+                { name: "Yamaha NMAX (with Y-Connect)", srp: 150300 },
+                { name: "Yamaha NMAX Tech Max Conn", srp: 170300 },
+                { name: "Yamaha NMAX YM26", srp: 152800 },
+                { name: "Yamaha NMAX Tech Max YM26", srp: 172800 },
+                { name: "Yamaha XMAX YM24", srp: 300400 },
+                { name: "Yamaha XMAX YM25", srp: 305400 },
+                { name: "Yamaha SNIPER 155 YM24", srp: 120300 },
+                { name: "Yamaha SNIPER 155R YM24", srp: 140300 },
+                { name: "Yamaha PG-1", srp: 87300 },
+                { name: "Yamaha MT-15", srp: 173400 },
+                { name: "Yamaha MT-15 YM25", srp: 174400 },
+                { name: "Yamaha MT-03 YM25", srp: 283400 },
+                { name: "Yamaha TFX 150", srp: 137300 },
+                { name: "Yamaha WR155R", srp: 174400 },
+                { name: "Yamaha WR155 YM25", srp: 174400 },
+                { name: "Yamaha WR155 YM26", srp: 175300 },
+                { name: "Yamaha XSR155", srp: 176400 },
+                { name: "Yamaha XSR155 YM25", srp: 176400 },
+                { name: "Yamaha XTZ125 YM25", srp: 85300 },
+                { name: "Yamaha YZF-R3 YM24", srp: 285400 },
+                { name: "Yamaha YZF-R15M", srp: 197400 },
+                { name: "Yamaha YZF-R15M YM25", srp: 198400 },
+                { name: "Yamaha SEROW250", srp: 234900 },
+                { name: "Yamaha YTX125", srp: 52300 },
+                { name: "Yamaha LEXI 155", srp: 94300 }
+            ]
+        };
+
+        let currentActiveModels = [];
+        let includeRegistration = false;
+        let targetTermMonths = 12;
+
+        function openAdminModal() {
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        function toggleAccordion() {
+            const content = document.getElementById("accordionContent");
+            const icon = document.getElementById("accordionIcon");
+            if (content.style.maxHeight && content.style.maxHeight !== "0px") {
+                content.style.maxHeight = "0px";
+                icon.innerText = "▼";
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.innerText = "▲";
+            }
+        }
+
+        function selectTargetTerm(months, btnElement) {
+            targetTermMonths = months;
+            document.querySelectorAll('.term-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+            calculateLoan();
+        }
+
+        function toggleRegistration() {
+            includeRegistration = !includeRegistration;
+            const btn = document.getElementById("regBtn");
+            if (includeRegistration) {
+                btn.classList.add("active");
+                btn.innerText = "✓ Registration & Insurance Included (+₱2,800)";
+            } else {
+                btn.classList.remove("active");
+                btn.innerText = "➕ Add Registration & Insurance (+₱2,800)";
+            }
+            calculateLoan();
+        }
+
+        function handleBrandChange() {
+            const brandSelect = document.getElementById("brandSelect");
+            const modelSearchInput = document.getElementById("modelSearchInput");
+            const suggestionsPanel = document.getElementById("suggestionsPanel");
+            const selectedBrand = brandSelect.value;
+
+            modelSearchInput.value = "";
+            suggestionsPanel.innerHTML = "";
+            suggestionsPanel.style.display = "none";
+            document.getElementById("srpAmount").value = "0";
+            document.getElementById("downpaymentAmount").value = "";
+
+            if (!selectedBrand || !priceBulletinData[selectedBrand]) {
+                currentActiveModels = [];
+                calculateLoan();
+                return;
+            }
+            currentActiveModels = priceBulletinData[selectedBrand];
+            calculateLoan();
+        }
+
+        function filterModels() {
+            const searchInput = document.getElementById("modelSearchInput").value.toLowerCase();
+            const suggestionsPanel = document.getElementById("suggestionsPanel");
+            suggestionsPanel.innerHTML = "";
+
+            if (currentActiveModels.length === 0) {
+                const brandAlert = document.createElement("div");
+                brandAlert.className = "suggestion-item";
+                brandAlert.style.color = "#dc2626";
+                brandAlert.style.fontWeight = "bold";
+                brandAlert.textContent = "Please select a Brand first!";
+                suggestionsPanel.appendChild(brandAlert);
+                suggestionsPanel.style.display = "block";
+                return;
+            }
+
+            if (!searchInput) {
+                showSuggestions();
+                return;
+            }
+
+            const filtered = currentActiveModels.filter(item => 
+                item.name.toLowerCase().includes(searchInput)
+            );
+
+            if (filtered.length === 0) {
+                const noResult = document.createElement("div");
+                noResult.className = "suggestion-item";
+                noResult.style.color = "#9ca3af";
+                noResult.textContent = "No matching models found";
+                suggestionsPanel.appendChild(noResult);
+                suggestionsPanel.style.display = "block";
+                return;
+            }
+
+            filtered.forEach(item => {
+                const element = document.createElement("div");
+                element.className = "suggestion-item";
+                element.textContent = `${item.name} (₱${item.srp.toLocaleString()})`;
+                element.onclick = () => selectModel(item.name, item.srp);
+                suggestionsPanel.appendChild(element);
+            });
+            suggestionsPanel.style.display = "block";
+        }
+
+        function showSuggestions() {
+            const suggestionsPanel = document.getElementById("suggestionsPanel");
+            suggestionsPanel.innerHTML = "";
+            
+            if (currentActiveModels.length === 0) {
+                const brandAlert = document.createElement("div");
+                brandAlert.className = "suggestion-item";
+                brandAlert.style.color = "#dc2626";
+                brandAlert.style.fontWeight = "bold";
+                brandAlert.textContent = "Please select a Brand first!";
+                suggestionsPanel.appendChild(brandAlert);
+                suggestionsPanel.style.display = "block";
+                return;
+            }
+
+            currentActiveModels.forEach(item => {
+                const element = document.createElement("div");
+                element.className = "suggestion-item";
+                element.textContent = `${item.name} (₱${item.srp.toLocaleString()})`;
+                element.onclick = () => selectModel(item.name, item.srp);
+                suggestionsPanel.appendChild(element);
+            });
+            suggestionsPanel.style.display = "block";
+        }
+
+        function selectModel(name, srp) {
+            document.getElementById("modelSearchInput").value = name;
+            document.getElementById("srpAmount").value = parseFloat(srp).toLocaleString('en-PH');
+            document.getElementById("srpAmount").dataset.rawSrp = srp;
+            document.getElementById("suggestionsPanel").style.display = "none";
+            
+            if (srp > 100000) {
+                const excess = srp - 100000;
+                document.getElementById("downpaymentAmount").value = excess;
+            } else {
+                document.getElementById("downpaymentAmount").value = "";
+            }
+            
+            calculateLoan();
+        }
+
+        document.addEventListener("click", function(e) {
+            const panel = document.getElementById("suggestionsPanel");
+            const input = document.getElementById("modelSearchInput");
+            if (e.target !== panel && e.target !== input) {
+                panel.style.display = "none";
+            }
+        });
+
+        // Exact PMT Amortization Math Logic
+        function calculatePMT(rate, nper, pv) {
+            if (rate === 0) return pv / nper;
+            let pvif = Math.pow(1 + rate, nper);
+            return (rate * pv * pvif) / (pvif - 1);
+        }
+
+        function addCustomRow() {
+            const container = document.getElementById('customRowsContainer');
+            const freq = parseInt(document.querySelector('input[name="freq"]:checked').value);
+            const totalPeriods = targetTermMonths * freq;
+
+            let optionsHTML = "";
+            for (let i = 1; i <= totalPeriods; i++) {
+                optionsHTML += `<option value="${i}">Installment ${i}</option>`;
+            }
+
+            const row = document.createElement('div');
+            row.className = 'custom-row';
+            row.innerHTML = `
+                <select class="custom-period" style="flex: 1;" onchange="calculateLoan()">${optionsHTML}</select>
+                <input type="number" class="custom-amount" placeholder="Amount (₱)" style="flex: 1;" oninput="calculateLoan()">
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove(); calculateLoan();">×</button>
+            `;
+            container.appendChild(row);
+            calculateLoan();
+        }
+
+        function calculateLoan() {
+            const model = document.getElementById("modelSearchInput").value || "Unit";
+            const baseSrp = parseFloat(document.getElementById("srpAmount").dataset.rawSrp) || 0;
+            const regFee = includeRegistration ? 2800 : 0;
+            const effectiveSrp = baseSrp + regFee;
+
+            const downpayment = parseFloat(document.getElementById("downpaymentAmount").value) || 0;
+            const financedAmount = Math.max(0, effectiveSrp - downpayment);
+            const fee = financedAmount * 0.10;
+            const loan = financedAmount + fee;
+
+            const freq = parseInt(document.querySelector('input[name="freq"]:checked').value);
+            const comfortablePmt = parseFloat(document.getElementById("comfortablePmt").value) || 0;
+
+            const periodRate = 0.05 / freq;
+            
+            const fmtRound = (num) => `₱${Math.round(num).toLocaleString('en-PH')}`;
+
+            document.getElementById("effectivePriceDisplay").textContent = fmtRound(effectiveSrp);
+            document.getElementById("financedAmountDisplay").textContent = fmtRound(financedAmount);
+            document.getElementById("loanAmountDisplay").textContent = fmtRound(loan);
+            document.getElementById("totalDownpaymentDisplay").textContent = fmtRound(downpayment);
+
+            document.getElementById("amortHeaderLabel").textContent = freq === 1 ? "Monthly Amortization" : "Semi-Monthly Amortization";
+
+            const terms = [12, 18, 24, 36];
+            const amorts = {};
+            terms.forEach(t => {
+                const nper = t * freq;
+                amorts[t] = calculatePMT(periodRate, nper, loan);
+            });
+
+            document.getElementById("amort12").textContent = fmtRound(amorts[12]);
+            document.getElementById("amort18").textContent = fmtRound(amorts[18]);
+            document.getElementById("amort24").textContent = fmtRound(amorts[24]);
+            document.getElementById("amort36").textContent = fmtRound(amorts[36]);
+
+            const reqPmtSelected = amorts[targetTermMonths];
+            const labelText = freq === 1 ? `Minimum required monthly (${targetTermMonths}m):` : `Minimum required semi-monthly (${targetTermMonths}m):`;
+            document.getElementById('minMonthlyHint').innerText = `${labelText} ${fmtRound(reqPmtSelected)}`;
+
+            const customOverrides = {};
+            const customRows = document.querySelectorAll('.custom-row');
+            customRows.forEach(row => {
+                const p = parseInt(row.querySelector('.custom-period')?.value);
+                const a = parseFloat(row.querySelector('.custom-amount')?.value);
+                if (p && a > 0) {
+                    customOverrides[p] = a;
+                }
+            });
+
+            document.getElementById('schedHeaderLabel').innerText = `📊 Amortization Schedule (${targetTermMonths} Mos Base)`;
+            const baseTargetPmt = Math.max(reqPmtSelected, comfortablePmt);
+            let balance = loan;
+            let schedHTML = "";
+            let totalInterestPaid = 0;
+            let period = 1;
+            const maxPeriods = targetTermMonths * freq;
+
+            while (balance > 0.001 && period <= 120) {
+                let interest = balance * periodRate;
+                let targetPmt = customOverrides[period] ? customOverrides[period] : baseTargetPmt;
+                let due = reqPmtSelected;
+                let actualPmt, principal;
+
+                if (balance + interest <= targetPmt) {
+                    actualPmt = balance + interest;
+                    principal = balance;
+                    balance = 0;
+                } else {
+                    actualPmt = targetPmt;
+                    principal = actualPmt - interest;
+                    balance = balance - principal;
+                }
+
+                let excess = Math.max(0, actualPmt - due);
+                totalInterestPaid += interest;
+
+                schedHTML += `
+                    <tr>
+                        <td>${period}</td>
+                        <td>${fmtRound(balance)}</td>
+                        <td>${fmtRound(principal)}</td>
+                        <td>${fmtRound(interest)}</td>
+                        <td>${fmtRound(due)}</td>
+                        <td class="${excess > 0 ? 'text-green' : ''}">${fmtRound(excess)}</td>
+                        <td>${fmtRound(actualPmt)}</td>
+                    </tr>
+                `;
+
+                period++;
+            }
+
+            const actualPeriodsPaid = period - 1;
+            const standardTotalInterest = (reqPmtSelected * maxPeriods) - loan;
+
+            const accBlock = document.getElementById('acceleratedBlock');
+            if (actualPeriodsPaid < maxPeriods || comfortablePmt > reqPmtSelected || Object.keys(customOverrides).length > 0) {
+                accBlock.style.display = 'block';
+                const unit = freq === 1 ? "months" : "periods";
+                document.getElementById('resPayoffTime').innerText = `${actualPeriodsPaid} ${unit}`;
+                document.getElementById('resAccInterest').innerText = fmtRound(totalInterestPaid);
+                document.getElementById('resSavings').innerText = fmtRound(Math.max(0, standardTotalInterest - totalInterestPaid));
+            } else {
+                accBlock.style.display = 'none';
+            }
+
+            document.getElementById("schedBody").innerHTML = schedHTML;
+
+            const content = document.getElementById("accordionContent");
+            if (content.style.maxHeight && content.style.maxHeight !== "0px") {
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+
+            const regNote = includeRegistration ? " (Includes ₱2,800 Reg & Ins)" : "";
+            const summaryText = `Hi! Here is the BillEase loan computation for ${model}:\n\n` +
+                `• SRP: ${fmtRound(effectiveSrp)}${regNote}\n` +
+                `• Downpayment: ${fmtRound(downpayment)}\n\n` +
+                `Monthly Amortization Schedule:\n` +
+                `• 12 Mos: ${fmtRound(amorts[12])}\n` +
+                `• 18 Mos: ${fmtRound(amorts[18])}\n` +
+                `• 24 Mos: ${fmtRound(amorts[24])}\n` +
+                `• 36 Mos: ${fmtRound(amorts[36])}\n\n` +
+                `This computation is an estimate of your installment dues. Follow the actual terms indicated in your loan agreement.`;
+
+            document.getElementById("replyBox").value = summaryText;
+        }
+
+        function copyReply() {
+            const replyBox = document.getElementById('replyBox');
+            replyBox.select();
+            replyBox.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(replyBox.value);
+            
+            const btn = document.querySelector('.btn-copy');
+            btn.innerText = '✅ Copied to Clipboard!';
+            setTimeout(() => {
+                btn.innerText = '📋 Copy Summary for Inquiry';
+            }, 2000);
+        }
+
+        function addNewUnit() {
+            const brand = document.getElementById("newUnitBrandSelect").value;
+            const modelName = document.getElementById("newUnitModelName").value.trim();
+            const srp = parseFloat(document.getElementById("newUnitSrp").value);
+
+            if (!brand || !modelName || isNaN(srp) || srp <= 0) {
+                alert("Please fill out all details.");
+                return;
+            }
+
+            const newObject = { name: modelName, srp: srp };
+            priceBulletinData[brand].push(newObject);
+
+            alert(`Added ${modelName} under ${brand}.`);
+            document.getElementById("newUnitModelName").value = "";
+            document.getElementById("newUnitSrp").value = "";
+
+            populateAdminModels();
+            populateDeleteModels();
+            if(document.getElementById("brandSelect").value === brand) {
+                currentActiveModels = priceBulletinData[brand];
+            }
+        }
+
+        function populateAdminModels() {
+            const brand = document.getElementById("adminBrandSelect").value;
+            const modelSelect = document.getElementById("adminModelSelect");
+            modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
+            document.getElementById("adminNewSrp").value = "";
+
+            if (!brand || !priceBulletinData[brand]) return;
+
+            priceBulletinData[brand].forEach((item, index) => {
+                const opt = document.createElement("option");
+                opt.value = index;
+                opt.textContent = item.name;
+                modelSelect.appendChild(opt);
+            });
+        }
+
+        function loadAdminSrp() {
+            const brand = document.getElementById("adminBrandSelect").value;
+            const modelIndex = document.getElementById("adminModelSelect").value;
+            if (brand && modelIndex !== "") {
+                const currentItem = priceBulletinData[brand][modelIndex];
+                document.getElementById("adminNewSrp").value = currentItem.srp;
+            } else {
+                document.getElementById("adminNewSrp").value = "";
+            }
+        }
+
+        function updateSrpPrice() {
+            const brand = document.getElementById("adminBrandSelect").value;
+            const modelIndex = document.getElementById("adminModelSelect").value;
+            const newSrp = parseFloat(document.getElementById("adminNewSrp").value);
+
+            if (!brand || modelIndex === "" || isNaN(newSrp) || newSrp <= 0) {
+                alert("Please select brand, model and price configurations.");
+                return;
+            }
+
+            priceBulletinData[brand][modelIndex].srp = newSrp;
+
+            alert(`Updated price for ${priceBulletinData[brand][modelIndex].name}`);
+
+            const activeSearchName = document.getElementById("modelSearchInput").value;
+            if (activeSearchName === priceBulletinData[brand][modelIndex].name) {
+                selectModel(priceBulletinData[brand][modelIndex].name, newSrp);
+            } else {
+                if(document.getElementById("brandSelect").value === brand) {
+                    currentActiveModels = priceBulletinData[brand];
+                }
+            }
+        }
+
+        function populateDeleteModels() {
+            const brand = document.getElementById("deleteBrandSelect").value;
+            const modelSelect = document.getElementById("deleteModelSelect");
+            modelSelect.innerHTML = '<option value="">-- Select Model to Remove --</option>';
+
+            if (!brand || !priceBulletinData[brand]) return;
+
+            priceBulletinData[brand].forEach((item, index) => {
+                const opt = document.createElement("option");
+                opt.value = index;
+                opt.textContent = item.name;
+                modelSelect.appendChild(opt);
+            });
+        }
+
+        function removeUnit() {
+            const brand = document.getElementById("deleteBrandSelect").value;
+            const modelIndex = document.getElementById("deleteModelSelect").value;
+
+            if (!brand || modelIndex === "") {
+                alert("Please select a brand and model to remove.");
+                return;
+            }
+
+            const removedName = priceBulletinData[brand][modelIndex].name;
+            priceBulletinData[brand].splice(modelIndex, 1);
+
+            alert(`Removed ${removedName} from list.`);
+
+            populateDeleteModels();
+            populateAdminModels();
+
+            if (document.getElementById("brandSelect").value === brand) {
+                currentActiveModels = priceBulletinData[brand];
+            }
+        }
+
+        // Dynamically load Manifest
+        const manifestData = {
+            "name": "BillEase Loan Calculator",
+            "short_name": "BillEase Calc",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#0f172a",
+            "theme_color": "#2563eb",
+            "icons": [{
+                "src": "https://cdn-icons-png.flaticon.com/512/5217/5217273.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+        document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(manifestBlob));
+
+        calculateLoan();
+    </script>
+</body>
+</html>
